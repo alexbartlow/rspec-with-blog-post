@@ -1,18 +1,3 @@
-# before - initial code:
-
-require 'rspec/autorun'
-
-class ServiceObjectUnderTest
-  # Obviously oversimplified logic. Not the point of this exercise
-  def a_long_and_descriptive_method(subscription_class, value)
-    if subscription_class == :enterprise_plus
-      value
-    else
-      value % 10
-    end
-  end
-end
-
 module RspecWithExtensions
   def describe_class_method(method_name, &block)
     describe ".#{method_name}" do
@@ -32,6 +17,16 @@ module RspecWithExtensions
 
       instance_eval(&block)
     end
+  end
+
+  def method_parameters(*parameters)
+    let :method_called_with_parameters do
+      parameters.inject(described_method.curry) do |curry, parameter|
+        curry.call(send(parameter))
+      end
+    end
+
+    subject { method_called_with_parameters }
   end
 
   class WithProxy
@@ -72,19 +67,3 @@ module RspecWithExtensions
 end
 
 RSpec::Core::ExampleGroup.send(:extend, RspecWithExtensions)
-
-describe ServiceObjectUnderTest do
-  describe_instance_method :a_long_and_descriptive_method do
-    subject { described_method.call(subscription_class, value) }
-
-    with subscription_class: :enterprise do
-      with(value: 10).it { is_expected.to eq(0) }
-      with(value: 8).it { is_expected.to eq(8) }
-    end
-
-    with subscription_class: :enterprise_plus do
-      with(value: 11).it { is_expected.to eq(11) }
-      with(value: 2).it { is_expected.to eq(2) }
-    end
-  end
-end
