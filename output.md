@@ -165,25 +165,15 @@ Our code is still pretty verbose, since we have to define a new context and a ne
 
 ```ruby
   def with(lets, &block)
-
     context_description = lets.map{|k, v| "#{k}=#{v}"}.join(',')
-
     context("with #{context_description}") do
-
       lets.each do |lk, lv|
-
         let(lk) { lv }
-
       end
 
-
-
       instance_eval(&block)
-
     end
-
   end
-
 end
 
 ```
@@ -192,38 +182,24 @@ Now, our specs look like this:
 
 ```ruby
 describe ServiceObjectUnderTest do
-
   describe_instance_method :a_long_and_descriptive_method do
-
     subject { described_method.call(subscription_class, value) }
 
-
-
     with subscription_class: :enterprise do
-
       with(value: 10) { it { is_expected.to eq(0) } }
-
       with(value: 8) { it { is_expected.to eq(8) } }
-
     end
-
-
 
     with subscription_class: :enterprise_plus do
-
       with(value: 11) { it { is_expected.to eq(11) } }
-
       with(value: 2) { it { is_expected.to eq(2) } }
-
     end
-
   end
-
 end
 
 ```
 
-Now we’re getting somewhere. Our tests are short an expressive, and basically all the boilerplate is gone.
+Now we’re getting somewhere. Our tests are short and expressive, and basically all the boilerplate is gone.
 
 ### Everything is better with curry
 
@@ -231,21 +207,13 @@ Having the subject there is nice, but now I'm thinking it could be better. What 
 
 ```ruby
   def method_parameters(*parameters)
-
     let :method_called_with_parameters do
-
       parameters.inject(described_method.curry) do |curry, parameter|
-
         curry.call(send(parameter))
-
       end
-
     end
 
-
-
     subject { method_called_with_parameters }
-
   end
 
 ```
@@ -262,73 +230,39 @@ I'm also not crazy about that weird `{ it { condition } }` block ; it looks like
 
 ```ruby
   class WithProxy
-
     def initialize(example_group, lets)
-
       @example_group = example_group
-
       @lets = lets
-
     end
-
-
 
     def context_description
-
       @lets.map{ |k, v| "#{k}=#{v}"}.join(',')
-
     end
-
-
 
     def call(&block)
-
       lets = @lets
-
       @example_group.context("with #{context_description}") do
-
         lets.each do |lk, lv|
-
           let(lk) { lv }
-
         end
 
-
-
         instance_eval(&block)
-
       end
-
     end
-
-
 
     def it(&block)
-
       call { it(&block) }
-
     end
-
   end
 
-
-
   def with(lets, &block)
-
     proxy = WithProxy.new(self, lets)
 
-
-
     if block
-
       proxy.call(&block)
-
     else
-
       proxy
-
     end
-
   end
 
 ```
@@ -338,7 +272,25 @@ I'm also not crazy about that weird `{ it { condition } }` block ; it looks like
 With that little bit of weirdness out of the way, check out our end result:
 
 ```ruby
-["require './service'\n", "require './final_rspec_with_extensions'\n", "\n", "describe ServiceObjectUnderTest do\n", "  describe_instance_method :a_long_and_descriptive_method do\n", "    method_parameters(:subscription_class, :value)\n", "\n", "    with subscription_class: :enterprise do\n", "      with(value: 10).it { is_expected.to eq(0) }\n", "      with(value: 8).it { is_expected.to eq(8) }\n", "    end\n", "\n", "    with subscription_class: :enterprise_plus do\n", "      with(value: 11).it { is_expected.to eq(11) }\n", "      with(value: 2).it { is_expected.to eq(2) }\n", "    end\n", "  end\n", "end\n"]
+require './service'
+require './final_rspec_with_extensions'
+
+describe ServiceObjectUnderTest do
+  describe_instance_method :a_long_and_descriptive_method do
+    method_parameters(:subscription_class, :value)
+
+    with subscription_class: :enterprise do
+      with(value: 10).it { is_expected.to eq(0) }
+      with(value: 8).it { is_expected.to eq(8) }
+    end
+
+    with subscription_class: :enterprise_plus do
+      with(value: 11).it { is_expected.to eq(11) }
+      with(value: 2).it { is_expected.to eq(2) }
+    end
+  end
+end
+
 ```
 
 Now THIS sparks some joy. I don’t have to include anonymous contexts, and I can use `with` in two different, powerful ways. I can use it as a combination `context` and `let` to introduce multiple examples. I can also immediately call `.it` to get a one-line expectation with an implicit subject.

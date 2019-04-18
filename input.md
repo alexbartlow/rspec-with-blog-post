@@ -41,23 +41,23 @@ We're inserting our own macro here to avoid repeating the name of the method (in
 Our code is still pretty verbose, since we have to define a new context and a new `let` for each parameter value we want to test. Let’s write a macro for that. We'll add this to our RspecExtensions module:
 
 ```ruby
-<%= File.readlines('./04_using_with_spec.rb')[13..23].join("\n") %>
+<%= File.readlines('./04_using_with_spec.rb')[13..23].join("") %>
 ```
 
 Now, our specs look like this:
 
 ```ruby
-<%= File.readlines('./04_using_with_spec.rb')[27..43].join("\n") %>
+<%= File.readlines('./04_using_with_spec.rb')[27..43].join("") %>
 ```
 
-Now we’re getting somewhere. Our tests are short an expressive, and basically all the boilerplate is gone.
+Now we’re getting somewhere. Our tests are short and expressive, and basically all the boilerplate is gone.
 
 ### Everything is better with curry
 
 Having the subject there is nice, but now I'm thinking it could be better. What if instead of telling rspec that my subject is the invocation of my method with certain parameters, I could just tell it what those parameters were?
 
 ```ruby
-<%= File.readlines('./final_rspec_with_extensions.rb')[21..29].join("\n") %>
+<%= File.readlines('./final_rspec_with_extensions.rb')[21..29].join("") %>
 ```
 
 The `curry` method doesn't show up outside of code-golf often but it's pretty cool. It allows you to do [partial application](https://en.wikipedia.org/wiki/Partial_application) in ruby. As a result - I don't have to declare my subject explicitly anymore. I just have to call `method_parameters(subscription_class, value)`, and everything just works.
@@ -71,7 +71,7 @@ expect { method_called_with_parameters }.to change(Feature. :count).by(1)
 I'm also not crazy about that weird `{ it { condition } }` block ; it looks like a busted handlebars template. Honestly, if I wasn’t writing a blog post about it, it’d leave as it is. But since we’re here, let's refactor our `with` method. I want to be able to give it a block (in which case it should do exactly what it does now), or call `.it` directly on it to give it a one-line expectation. The only real way to do that is to use a proxy object:
 
 ```ruby
-<%= File.readlines('./final_rspec_with_extensions.rb')[31..65].join("\n") %>
+<%= File.readlines('./final_rspec_with_extensions.rb')[31..65].join("") %>
 ```
 
 ### The big pay-off
@@ -79,7 +79,7 @@ I'm also not crazy about that weird `{ it { condition } }` block ; it looks like
 With that little bit of weirdness out of the way, check out our end result:
 
 ```ruby
-<%= File.readlines('./05_one_line_with_proxy_spec.rb') %>
+<%= File.read('./05_one_line_with_proxy_spec.rb') %>
 ```
 
 Now THIS sparks some joy. I don’t have to include anonymous contexts, and I can use `with` in two different, powerful ways. I can use it as a combination `context` and `let` to introduce multiple examples. I can also immediately call `.it` to get a one-line expectation with an implicit subject.
