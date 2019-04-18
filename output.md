@@ -218,7 +218,7 @@ Having the subject there is nice, but now I'm thinking it could be better. What 
 
 ```
 
-The `curry` method doesn't show up outside of code-golf often but it's pretty cool. It allows you to do [partial application](https://en.wikipedia.org/wiki/Partial_application) in ruby. As a result - I don't have to declare my subject explicitly anymore. I just have to call `method_parameters(subscription_class, value)`, and everything just works.
+The `curry` method doesn't show up outside of code-golf often but it's pretty cool. It allows you to do [partial application](https://en.wikipedia.org/wiki/Partial_application) in ruby. As a result - I don't have to declare my subject explicitly anymore. I just have to call `method_parameters(:subscription_class, :value)`, and everything just works.
 
 The way I've written it here, there's also `let(:method_called_with_parameters)`. This is so I can do something like this, if I'm testing for side effects:
 
@@ -295,7 +295,7 @@ end
 
 Now THIS sparks some joy. I don’t have to include anonymous contexts, and I can use `with` in two different, powerful ways. I can use it as a combination `context` and `let` to introduce multiple examples. I can also immediately call `.it` to get a one-line expectation with an implicit subject.
 
-I get a beautiful, self-evident description of what the method should do in a variety of circumstances. I'll admit, I've never really been a TDD guy before - but something like this makes TDD a snap. Writing these specifications is quick, clean, and painless. You can totally picture putting a few of these specifications together 
+I get a beautiful, self-evident description of what the method should do in a variety of circumstances. I'll admit, I've never really been a TDD guy before - but something like this makes TDD a snap. Writing these specifications is quick, clean, and painless.
 
 This is the output I get from running the above example, which is also very readable.
 
